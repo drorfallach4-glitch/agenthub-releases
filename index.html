@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AgentHub – צוות סוכנים בצ'אט אחד</title>
-<meta name="description" content="AgentHub מושיב את Claude Code, Codex ושאר הסוכנים שלך באותה שיחה. כותבים פעם אחת, וכל אחד יודע מה החלק שלו. הורדה למק.">
+<meta name="description" content="AgentHub מושיב את Claude Code, Codex, Gemini ו-Grok באותה שיחה. כותבים פעם אחת, וכל אחד יודע מה החלק שלו. הורדה למק.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -121,10 +121,12 @@ section { padding: clamp(96px, 14vw, 200px) var(--margin) 0; }
 .compare-head { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; align-items: start; }
 .compare-head h2 { grid-column: 1 / 7; font-size: var(--step-head); }
 .compare-head p { grid-column: 7 / 13; max-width: 46ch; }
-.specimens { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 10vh; height: clamp(260px, 30vw, 440px); overflow: hidden; }
+.specimens { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: clamp(130px, 15vw, 230px); gap: 24px; margin-top: 10vh; }
+.specimen.soon { color: #74756f; }
+.soon-note { margin-top: 24px; color: var(--muted); }
 .specimen { position: relative; overflow: hidden; }
 .specimen .cap { font-size: var(--step-small); color: var(--muted); margin-bottom: 8px; display: block; direction: ltr; text-align: end; }
-.specimen .word { font-size: clamp(110px, 15.5vw, 240px); font-weight: 900; letter-spacing: -0.05em; line-height: 0.8; display: block; }
+.specimen .word { font-size: clamp(96px, 13vw, 210px); font-weight: 900; letter-spacing: -0.05em; line-height: 0.8; display: block; }
 
 /* 3. Stages as one bar. */
 .stages h2 { font-size: var(--step-head); margin-bottom: 64px; }
@@ -172,7 +174,7 @@ footer { background: var(--field-1); color: var(--field-1-ink); padding: 48px va
 .foot-places { grid-column: 1 / 6; display: grid; gap: 6px; list-style: none; }
 .foot-places a { font-size: var(--step-lead); font-weight: 700; text-decoration: none; color: #2f4a2e; }
 .foot-places a:hover { text-decoration: underline; }
-.foot-links { grid-column: 7 / 13; display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; font-size: var(--step-small); list-style: none; }
+.foot-links { grid-column: 7 / 13; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; font-size: var(--step-small); list-style: none; }
 .foot-links li { display: grid; gap: 8px; }
 .foot-links a { text-decoration: none; }
 .foot-links a:hover { text-decoration: underline; }
@@ -218,16 +220,14 @@ footer { background: var(--field-1); color: var(--field-1-ink); padding: 48px va
   .response { margin-inline-start: 0; }
   .compare-head { display: grid; grid-template-columns: 1fr; }
   .compare-head h2, .compare-head p { grid-column: 1; }
-  .specimens { grid-template-columns: 1fr; height: auto; overflow: visible; gap: 32px; }
-  .specimen { height: 40svh; overflow: hidden; }
-  .specimen .word { font-size: 46vw; }
-  .specimen:nth-child(2) { background: var(--field-1); color: var(--field-1-ink); padding: 16px; }
-  .specimen:nth-child(2) .cap { color: #4a4a46; }
+  .specimens { grid-template-columns: 1fr 1fr; grid-auto-rows: 17vw; gap: 8px 16px; }
+  .specimen .word { font-size: 14vw; }
   .bar { flex-direction: column; height: 70svh; }
   .seg-1 { flex-grow: 2; } .seg-2 { flex-grow: 5; } .seg-3 { flex-grow: 9; }
   .clauses { flex-direction: column; gap: 12px; }
   .faq { display: block; }
-  .qa { display: grid; gap: 12px; }
+  .qa { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  .qa h3, .qa p { grid-column: 1; }
   .qa + .qa { margin-top: 56px; }
   .qa h3 { font-size: 24px; }
   .faq-title { font-size: 24px; margin-bottom: 40px; }
@@ -258,7 +258,7 @@ footer { background: var(--field-1); color: var(--field-1-ink); padding: 48px va
       <div class="chip chip-3" data-ui aria-hidden="true"><span class="switch"></span><span><b>ביקורת הדדית</b><br><span class="meta">עד 3 סבבים</span></span></div>
     </div>
     <div class="hero-foot">
-      <p>AgentHub מושיב את Claude Code, Codex ושאר הסוכנים שלך באותה שיחה. כותבים פעם אחת, וכל אחד יודע מה החלק שלו.</p>
+      <p>AgentHub מושיב את Claude Code, Codex, Gemini ו-Grok באותה שיחה. כותבים פעם אחת, וכל אחד יודע מה החלק שלו.</p>
       <div class="hero-cta" id="download">
         <a class="button" href="https://github.com/drorfallach4-glitch/agenthub-releases/releases/latest/download/AgentHub-mac-arm64.dmg">הורדה למק</a>
         <small>מק עם שבב Apple · חינם בתקופת הבטא</small>
@@ -322,11 +322,13 @@ footer { background: var(--field-1); color: var(--field-1-ink); padding: 48px va
   <section aria-labelledby="pair-title">
     <div class="compare-head">
       <h2 id="pair-title" data-rise>כל אחד נשאר מי שהוא</h2>
-      <p data-rise>Claude Code ו-Codex רצים אצלך במחשב, עם החשבונות, הסקילים והמחברים שלך, בדיוק כמו באפליקציה שלהם. AgentHub לא מחליף אותם. הוא נותן להם שולחן אחד.</p>
+      <p data-rise>כל סוכן רץ אצלך במחשב, עם החשבונות, הסקילים והמחברים שלך, בדיוק כמו באפליקציה שלו. AgentHub לא מחליף אותם, הוא נותן להם שולחן אחד: Claude Code, Codex, Gemini ו-Grok, וכל סוכן חדש שמצטרף בעדכון.</p>
     </div>
     <div class="specimens" aria-hidden="true">
       <div class="specimen" data-rise><span class="word">קלוד</span></div>
       <div class="specimen" data-rise><span class="word">קודקס</span></div>
+      <div class="specimen" data-rise><span class="word">ג'מיני</span></div>
+      <div class="specimen" data-rise><span class="word">גרוק</span></div>
     </div>
   </section>
 
@@ -339,7 +341,7 @@ footer { background: var(--field-1); color: var(--field-1-ink); padding: 48px va
     </div>
     <div class="clauses" data-rise>
       <p>קודם, פותחים את הקובץ וגוררים את AgentHub לתיקיית Applications.</p>
-      <p>אחר כך, מתקינים את Claude Code או Codex ומתחברים, אם עוד לא.</p>
+      <p>אחר כך, מתקינים סוכן אחד לפחות ומתחברים, אם עוד לא.</p>
       <p>ומשם, בוחרים תיקיית פרויקט וכותבים. עדכונים מגיעים לבד.</p>
     </div>
     <div class="stages-foot">
@@ -353,11 +355,12 @@ footer { background: var(--field-1); color: var(--field-1-ink); padding: 48px va
   <section id="faq" aria-labelledby="faq-title">
     <div class="faq">
       <h2 class="faq-title" id="faq-title" data-rise>שאלות</h2>
-      <div class="qa" data-rise><h3>הקוד שלי עולה לאנשהו?</h3><p>לא דרכנו. AgentHub רץ על המחשב שלך ומפעיל את הכלים שכבר מותקנים אצלך. הסוכנים מדברים עם Anthropic ו-OpenAI בדיוק כמו בלי AgentHub.</p></div>
-      <div class="qa" data-rise><h3>מה צריך כדי להתחיל?</h3><p>מק עם שבב Apple (M1 ומעלה), ולפחות אחד מהשניים: Claude Code או Codex, מותקן ומחובר עם החשבון שלך.</p></div>
-      <div class="qa" data-rise><h3>כמה זה עולה?</h3><p>AgentHub חינם בתקופת הבטא. על הסוכנים עצמם משלמים כמו היום, דרך המנוי או החשבון שלך אצל Anthropic או OpenAI.</p></div>
+      <div class="qa" data-rise><h3>הקוד שלי עולה לאנשהו?</h3><p>לא דרכנו. AgentHub רץ על המחשב שלך ומפעיל את הכלים שכבר מותקנים אצלך. כל סוכן מדבר עם הספק שלו בדיוק כמו בלי AgentHub.</p></div>
+      <div class="qa" data-rise><h3>מה צריך כדי להתחיל?</h3><p>מק עם שבב Apple (M1 ומעלה), ולפחות סוכן אחד מותקן ומחובר עם החשבון שלך: Claude Code, Codex, Gemini או Grok.</p></div>
+      <div class="qa" data-rise><h3>כמה זה עולה?</h3><p>AgentHub חינם בתקופת הבטא. על הסוכנים עצמם משלמים כמו היום, דרך המנוי או החשבון שלך אצל כל ספק.</p></div>
       <div class="qa" data-rise><h3>ומה עם הייגספילד?</h3><p>עובד, וגם כל מחבר אחר. כל מחבר שחיברת ל-Claude זמין בצ'אט. כשמבקשים אותו במפורש הוא עובד בלי לשאול, ואחרת מופיע כרטיס אישור.</p></div>
       <div class="qa" data-rise><h3>איך מתעדכנים?</h3><p>לבד. גרסה חדשה יורדת ברקע, ומופיע פס עם "הפעל מחדש ועדכן". אם לא לוחצים, היא מותקנת בסגירה הבאה.</p></div>
+      <div class="qa" data-rise><h3>אילו סוכנים עובדים?</h3><p>Claude Code, Codex, Gemini ו-Grok, באותה שיחה. כל סוכן חדש מגיע בעדכון, בלי להוריד מחדש.</p></div>
       <div class="qa" data-rise><h3>ווינדוס ומק עם אינטל?</h3><p>בדרך. בינתיים יש גרסה למק עם שבב Apple בלבד.</p></div>
     </div>
   </section>
@@ -382,6 +385,7 @@ footer { background: var(--field-1); color: var(--field-1-ink); padding: 48px va
     <ul class="foot-links">
       <li><a href="#how">איך זה עובד</a><a href="#faq">שאלות</a></li>
       <li><a href="https://code.claude.com/docs/en/setup">התקנת Claude Code</a><a href="https://developers.openai.com/codex">התקנת Codex</a></li>
+      <li><a href="https://github.com/google-gemini/gemini-cli">התקנת Gemini CLI</a><a href="https://x.ai/grok">Grok</a></li>
     </ul>
   </div>
   <div class="foot-legal"><span>© 2026 AgentHub</span><a href="#top">חזרה למעלה</a></div>
