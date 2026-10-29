@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentHub – צוות סוכנים בצ'אט אחד</title>
+<meta name="description" content="AgentHub מושיב את Claude Code, Codex ושאר הסוכנים שלך באותה שיחה. כותבים פעם אחת, וכל אחד יודע מה החלק שלו. הורדה למק.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #1c1c1c;
+  --surface: #262626;
+  --surface-2: #303030;
+  --ink: #f1f1ef;
+  --muted: #a3a49f;
+  --accent: #8fa68e;
+  --accent-ink: #1c1c1c;
+  --field-1: #c8c5ba;
+  --field-1-ink: #1c1c1c;
+  --stage-1: #8fa68e;
+  --stage-2: #c8c5ba;
+  --stage-3: #3a3a38;
+  --step-small: 0.9375rem;
+  --step-body: 1.1875rem;
+  --step-lead: 1.625rem;
+  --step-head: clamp(2.25rem, 1.2rem + 4.2vw, 5rem);
+  --step-display: clamp(4.25rem, 11vw, 10.5rem);
+  --margin: clamp(20px, 3vw, 40px);
+  --font: 'Heebo', 'Arial Hebrew', system-ui, sans-serif;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: var(--bg); color: var(--ink); font-family: var(--font); scroll-behavior: smooth; }
+body { font-size: var(--step-body); line-height: 1.5; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+::selection { background: var(--accent); color: var(--accent-ink); }
+h1, h2, h3 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; text-wrap: balance; }
+p { text-wrap: pretty; }
+
+.button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5em;
+  min-height: 52px; padding: 0 1.4em; border: 0; border-radius: 0;
+  background: var(--accent); color: var(--accent-ink);
+  font: 700 var(--step-body)/1 var(--font); text-decoration: none; cursor: pointer;
+  transition: transform 160ms var(--ease-out), background-color 160ms var(--ease-out);
+}
+.button:hover { background: #a3b8a2; }
+.button:active { transform: scale(0.97); }
+.link { font-weight: 700; text-decoration: underline; text-underline-offset: 0.2em; transition: color 160ms; }
+.link:hover { color: var(--accent); }
+
+/* Top corner: wordmark and two links, no bar. */
+.top { position: absolute; inset-inline: var(--margin); top: 24px; display: flex; justify-content: space-between; align-items: center; z-index: 2; }
+.wordmark { font-weight: 900; font-size: 1.125rem; letter-spacing: -0.02em; text-decoration: none; direction: ltr; }
+.top nav { display: flex; gap: 28px; align-items: center; font-size: var(--step-small); }
+
+/* Hero: the statement, and the parts the message becomes. */
+.hero { position: relative; min-height: 100svh; display: grid; grid-template-rows: 1fr auto; padding: 120px var(--margin) 48px; }
+.hero-statement { align-self: center; position: relative; }
+.hero h1 { font-size: var(--step-display); }
+.hero h1 .line { display: block; overflow: hidden; padding-block: 0.06em; }
+.hero h1 .line > span { display: inline-block; }
+.hero-foot { display: flex; justify-content: space-between; align-items: end; gap: 32px; }
+.hero-foot p { max-width: 40ch; font-size: var(--step-lead); line-height: 1.35; }
+.hero-cta { display: grid; justify-items: start; gap: 12px; }
+.hero-cta small { color: var(--muted); font-size: var(--step-small); }
+
+.chip {
+  position: absolute; display: grid; gap: 4px; padding: 14px 18px; min-width: 240px;
+  background: var(--surface-2); color: var(--ink); border-radius: 0; font-size: var(--step-small); line-height: 1.3;
+}
+.chip b { font-weight: 700; font-size: 1rem; }
+.chip .meta { color: var(--muted); }
+.chip-1 { inset-inline-start: 46%; top: -0.4em; transform: rotate(-2.5deg); }
+.chip-2 { inset-inline-end: 6%; top: 38%; transform: rotate(2deg); }
+.chip-3 { inset-inline-start: 0; bottom: -2.8em; transform: rotate(-3deg); display: flex; align-items: center; gap: 14px; }
+.switch { width: 44px; height: 26px; background: var(--accent); position: relative; flex: none; }
+.switch::after { content: ''; position: absolute; top: 3px; inset-inline-start: 3px; width: 20px; height: 20px; background: var(--accent-ink); }
+
+/* Section rhythm. */
+section { padding: clamp(96px, 14vw, 200px) var(--margin) 0; }
+.section-title { font-size: var(--step-head); margin-bottom: clamp(40px, 5vw, 64px); }
+
+/* 1. Call and response. */
+.how-grid { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 24px; }
+.exchange-col { grid-column: 1 / 7; }
+.how-aside { grid-column: 8 / 13; align-self: start; position: sticky; top: 40px; }
+.how-aside img { width: 100%; }
+.how-aside figcaption { font-size: var(--step-small); color: var(--muted); padding-top: 12px; }
+.exchange { display: grid; gap: 16px; }
+.exchange + .exchange { margin-top: 88px; }
+.exchange > h3 { font-size: var(--step-lead); font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
+.call { background: var(--surface); padding: 20px; font-size: var(--step-body); line-height: 1.5; }
+.call .who { color: var(--muted); font-size: var(--step-small); margin-bottom: 6px; }
+.response { margin-inline-start: 56px; background: var(--surface-2); padding: 18px 20px; display: grid; gap: 12px; font-size: var(--step-small); line-height: 1.45; }
+.samples { display: flex; flex-wrap: wrap; gap: 8px; }
+.samples button {
+  font: 500 var(--step-small)/1 var(--font); color: var(--ink); background: transparent; cursor: pointer;
+  border: 2px solid var(--surface-2); padding: 10px 14px; min-height: 44px; transition: background-color 160ms, border-color 160ms, transform 160ms var(--ease-out);
+}
+.samples button:hover { border-color: var(--accent); }
+.samples button:active { transform: scale(0.97); }
+.samples button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.status { color: var(--muted); font-size: var(--step-small); }
+.part { display: grid; grid-template-columns: 7.5em 1fr; gap: 4px 14px; align-items: baseline; }
+.part + .part { padding-top: 12px; }
+.part .name { font-weight: 700; font-size: 1rem; }
+.part .tags { grid-column: 2; color: var(--muted); }
+.result { margin-top: 24px; width: 100%; }
+.exchange.final { max-width: none; }
+.result figure { overflow: hidden; background: var(--surface); }
+.result img { width: 100%; animation: drift 24s ease-in-out infinite alternate; }
+.result figcaption { font-size: var(--step-small); color: var(--muted); padding-top: 12px; max-width: 60ch; }
+@keyframes drift { from { transform: scale(1); } to { transform: scale(1.06); } }
+
+/* 2. Two giant words. */
+.compare-head { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; align-items: start; }
+.compare-head h2 { grid-column: 1 / 7; font-size: var(--step-head); }
+.compare-head p { grid-column: 7 / 13; max-width: 46ch; }
+.specimens { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 10vh; height: clamp(260px, 30vw, 440px); overflow: hidden; }
+.specimen { position: relative; overflow: hidden; }
+.specimen .cap { font-size: var(--step-small); color: var(--muted); margin-bottom: 8px; display: block; direction: ltr; text-align: end; }
+.specimen .word { font-size: clamp(110px, 15.5vw, 240px); font-weight: 900; letter-spacing: -0.05em; line-height: 0.8; display: block; }
+
+/* 3. Stages as one bar. */
+.stages h2 { font-size: var(--step-head); margin-bottom: 64px; }
+.bar { display: flex; gap: 6px; height: 22vh; min-height: 180px; }
+.seg { padding: 20px; display: flex; flex-direction: column; justify-content: space-between; min-width: 12%; }
+.seg .dur { font-size: var(--step-lead); font-weight: 900; letter-spacing: -0.02em; line-height: 1.1; }
+.seg-1 { flex-grow: 2; background: var(--stage-1); color: var(--accent-ink); }
+.seg-2 { flex-grow: 5; background: var(--stage-2); color: var(--field-1-ink); }
+.seg-3 { flex-grow: 14; background: var(--stage-3); color: var(--ink); }
+.clauses { display: flex; gap: 6px; margin-top: 16px; }
+.clauses p { max-width: 24ch; font-size: var(--step-body); }
+.clauses p:nth-child(1) { flex-grow: 2; min-width: 12%; }
+.clauses p:nth-child(2) { flex-grow: 5; }
+.clauses p:nth-child(3) { flex-grow: 14; }
+.clauses p, .seg { flex-basis: 0; }
+.stages-foot { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 24px; margin-top: 64px; align-items: center; }
+.stages-foot figure { grid-column: 7 / 13; }
+.stages-foot figure img { width: 100%; }
+.update-ui { grid-column: 1 / 6; display: flex; align-items: center; justify-content: center; gap: 14px; padding: 14px 16px; background: #e7efe6; color: #1f3a22; font-size: var(--step-small); }
+.update-ui .u-btn { background: #2f5d34; color: #fff; padding: 6px 12px; font-weight: 700; }
+.update-ui .u-later { padding: 6px 8px; font-weight: 700; }
+
+/* 4. FAQ: questions large, answers beside. */
+.faq { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 24px; }
+.faq > * { grid-column: 1 / -1; }
+.qa { display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; align-items: baseline; }
+.qa + .qa { margin-top: 80px; }
+.qa h3, .faq-title { grid-column: 1 / 7; font-size: var(--step-lead); font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+.faq-title { color: var(--muted); margin-bottom: 80px; }
+.qa p { grid-column: 8 / 13; max-width: 42ch; line-height: 1.55; }
+
+/* 5. Closing sentence whose last word is the button. */
+.closing { padding-bottom: clamp(96px, 14vw, 200px); display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 24px; align-items: center; }
+.closing .closing-text { grid-column: 1 / 7; }
+.closing figure { grid-column: 7 / 13; }
+.closing figure img { width: 100%; }
+.closing p.statement { font-size: var(--step-head); font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; }
+.closing .button { font-size: inherit; min-height: 1.1em; padding: 0.08em 0.35em; vertical-align: baseline; letter-spacing: inherit; font-weight: 900; }
+.closing .after { margin-top: 20px; color: var(--muted); font-size: var(--step-body); }
+
+/* 6. Footer: name first, places under it. */
+footer { background: var(--field-1); color: var(--field-1-ink); padding: 48px var(--margin) 40px; overflow: hidden; }
+.foot-name { font-size: clamp(5rem, 21vw, 20rem); font-weight: 900; letter-spacing: -0.05em; line-height: 0.82; direction: ltr; text-align: start; height: 0.78em; overflow: hidden; }
+.foot-row { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; margin-top: 72px; }
+.foot-places { grid-column: 1 / 6; display: grid; gap: 6px; list-style: none; }
+.foot-places a { font-size: var(--step-lead); font-weight: 700; text-decoration: none; color: #2f4a2e; }
+.foot-places a:hover { text-decoration: underline; }
+.foot-links { grid-column: 7 / 13; display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; font-size: var(--step-small); list-style: none; }
+.foot-links li { display: grid; gap: 8px; }
+.foot-links a { text-decoration: none; }
+.foot-links a:hover { text-decoration: underline; }
+.foot-legal { display: flex; justify-content: space-between; margin-top: 96px; font-size: var(--step-small); }
+
+/* Entrances: content is visible without script; with script, parts rise once as their section enters. */
+.js [data-rise] { opacity: 0; transform: translateY(24px); transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out); }
+.js [data-rise].in { opacity: 1; transform: none; }
+.js .hero h1 .line > span { transform: translateY(105%); animation: rise 900ms var(--ease-out) forwards; }
+.js .hero h1 .line:nth-child(2) > span { animation-delay: 110ms; }
+.js .hero .chip, .js .hero-foot { opacity: 0; animation: fade 600ms var(--ease-out) 700ms forwards; }
+@keyframes rise { to { transform: none; } }
+@keyframes fade { to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .js [data-rise], .js .hero .chip, .js .hero-foot { opacity: 1; transform: none; transition: none; animation: none; }
+  .js .hero h1 .line > span { transform: none; animation: none; }
+  .result img { animation: none; }
+}
+
+@media (max-width: 1100px) {
+  .hero-statement { display: grid; gap: 16px; }
+  .chip { position: static; transform: none; min-width: 0; }
+  .chip-1 { order: -1; }
+  .closing { display: block; }
+  .closing figure { margin-top: 40px; }
+}
+@media (max-width: 760px) {
+  .top nav .link { display: none; }
+  .hero { padding-top: 96px; }
+  .hero-statement { display: grid; gap: 16px; }
+  .chip { position: static; transform: none; min-width: 0; }
+  .chip-1 { order: -1; }
+  .hero-foot { flex-direction: column; align-items: stretch; }
+  .hero-cta .button { width: 100%; }
+  .how-grid, .stages-foot, .closing { display: block; }
+  .hero-foot p { font-size: var(--step-body); }
+  .seg .dur { font-size: var(--step-body); }
+  .closing p.statement { font-size: 2rem; }
+  .how-aside { position: static; margin-top: 56px; }
+  .stages-foot figure, .closing figure { margin-top: 32px; }
+  .response { margin-inline-start: 0; }
+  .compare-head { display: grid; grid-template-columns: 1fr; }
+  .compare-head h2, .compare-head p { grid-column: 1; }
+  .specimens { grid-template-columns: 1fr; height: auto; overflow: visible; gap: 32px; }
+  .specimen { height: 40svh; overflow: hidden; }
+  .specimen .word { font-size: 46vw; }
+  .specimen:nth-child(2) { background: var(--field-1); color: var(--field-1-ink); padding: 16px; }
+  .specimen:nth-child(2) .cap { color: #4a4a46; }
+  .bar { flex-direction: column; height: 70svh; }
+  .seg-1 { flex-grow: 2; } .seg-2 { flex-grow: 5; } .seg-3 { flex-grow: 9; }
+  .clauses { flex-direction: column; gap: 12px; }
+  .faq { display: block; }
+  .qa { display: grid; gap: 12px; }
+  .qa + .qa { margin-top: 56px; }
+  .qa h3 { font-size: 24px; }
+  .faq-title { font-size: 24px; margin-bottom: 40px; }
+  .foot-row { grid-template-columns: 1fr; }
+  .foot-places, .foot-links { grid-column: 1; }
+  .foot-legal { gap: 16px; }
+}
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add('js')</script>
+
+<header class="top">
+  <a class="wordmark" href="#top">AgentHub</a>
+  <nav aria-label="ראשי">
+    <a class="link" href="#how">איך זה עובד</a>
+    <a class="link" href="#faq">שאלות</a>
+    <a class="link" href="#download">הורדה</a>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="hero" aria-labelledby="hero-title" style="padding-top: 120px">
+    <div class="hero-statement">
+      <h1 id="hero-title"><span class="line"><span>צוות אחד.</span></span><span class="line"><span>צ'אט אחד.</span></span></h1>
+      <div class="chip chip-1" data-ui aria-hidden="true"><b>קלוד · Opus</b><span class="meta">החלק שלך: לבנות את הגלריה לפי התוכנית</span></div>
+      <div class="chip chip-2" data-ui aria-hidden="true"><b>קודקס</b><span class="meta">החלק שלך: לכתוב את התוכנית</span></div>
+      <div class="chip chip-3" data-ui aria-hidden="true"><span class="switch"></span><span><b>ביקורת הדדית</b><br><span class="meta">עד 3 סבבים</span></span></div>
+    </div>
+    <div class="hero-foot">
+      <p>AgentHub מושיב את Claude Code, Codex ושאר הסוכנים שלך באותה שיחה. כותבים פעם אחת, וכל אחד יודע מה החלק שלו.</p>
+      <div class="hero-cta" id="download">
+        <a class="button" href="https://github.com/drorfallach4-glitch/agenthub-releases/releases/latest/download/AgentHub-mac-arm64.dmg">הורדה למק</a>
+        <small>מק עם שבב Apple · חינם בתקופת הבטא</small>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" aria-labelledby="how-title">
+    <div class="how-grid">
+    <div class="exchange-col">
+      <h2 class="section-title" id="how-title" data-rise>כותבים כמו לאנשים</h2>
+
+      <div class="exchange" data-rise>
+        <h3>קודם, כותבים מה צריך, במילים שלך.</h3>
+        <div class="samples" role="group" aria-label="הודעות לדוגמה">
+          <button type="button" data-sample="0" aria-pressed="true">תוכנית ובנייה</button>
+          <button type="button" data-sample="1" aria-pressed="false">תמונה מהייגספילד</button>
+          <button type="button" data-sample="2" aria-pressed="false">תודה רבה</button>
+        </div>
+        <div class="call" data-ui>
+          <div class="who">אתה</div>
+          <div id="sample-text">קודקס תכתוב תוכנית לגלריה, וקלוד יבנה לפיה באופוס. אחר כך תבדקו אחד את השני.</div>
+        </div>
+        <div class="response" data-ui aria-live="polite" id="sample-result">
+          <div class="part"><span class="name">קודקס</span><span>לכתוב תוכנית לגלריה</span><span class="tags">ביקורת: קלוד</span></div>
+          <div class="part"><span class="name">קלוד</span><span>לבנות את הגלריה לפי התוכנית</span><span class="tags">Opus · מחכה לקודקס · ביקורת: קודקס</span></div>
+        </div>
+      </div>
+
+      <div class="exchange" data-rise>
+        <h3>אחר כך, הם מעבירים ביניהם בלי שתצטרך לתווך.</h3>
+        <div class="call" data-ui>
+          <div class="who">קלוד ← קודקס</div>
+          <div>תעבור על הגלריה שבניתי ותגיד מה לתקן, לפי החומרה.</div>
+        </div>
+        <div class="response" data-ui>
+          <div class="who status">קודקס</div>
+          <div>חמור: קובץ היומן נשבר בשדות עם פסיקים. צריך escape לפי תקן iCalendar.</div>
+          <div>בינוני: הכפתור "ניווט" מפנה לאותו עמוד. להחליף בקישור לוויז.</div>
+          <div class="status">קלוד מתקן ושולח שוב, סבב 2 מתוך 3.</div>
+        </div>
+      </div>
+    </div>
+    <figure class="how-aside" data-rise>
+      <img src="assets/invite-details.jpg" width="1440" height="1100" loading="lazy" alt="עמוד פרטי הערב בהזמנה: התאריך 20 במאי, ספירה לאחור של 203 ימים, לוח זמנים ותמונת הזוג">
+      <figcaption>פרטי הערב, כמו שקלוד בנה אותם אחרי הביקורת של קודקס.</figcaption>
+    </figure>
+    </div>
+
+    <div class="exchange final" data-rise style="margin-top: 88px">
+      <h3>בסוף, התוצאה מופיעה בצ'אט, כמו שהיא.</h3>
+      <div class="result">
+        <figure>
+          <img src="assets/invite-top.jpg" width="1440" height="900" alt="פתיח של הזמנה לחתונה: תמונת זוג בין עצי זית בשקיעה ולצדה השמות נועה ואיתן והתאריך">
+        </figure>
+        <figcaption>הזמנה לחתונה שקלוד וקודקס בנו יחד ב-AgentHub מהודעה אחת: קודקס כתב את התוכנית, קלוד יצר את התמונות בהייגספילד ובנה את הדף, וקודקס בדק.</figcaption>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="pair-title">
+    <div class="compare-head">
+      <h2 id="pair-title" data-rise>כל אחד נשאר מי שהוא</h2>
+      <p data-rise>Claude Code ו-Codex רצים אצלך במחשב, עם החשבונות, הסקילים והמחברים שלך, בדיוק כמו באפליקציה שלהם. AgentHub לא מחליף אותם. הוא נותן להם שולחן אחד.</p>
+    </div>
+    <div class="specimens" aria-hidden="true">
+      <div class="specimen" data-rise><span class="word">קלוד</span></div>
+      <div class="specimen" data-rise><span class="word">קודקס</span></div>
+    </div>
+  </section>
+
+  <section class="stages" aria-labelledby="stages-title">
+    <h2 id="stages-title" data-rise>מהורדה לעבודה</h2>
+    <div class="bar" data-ui data-rise>
+      <div class="seg seg-1"><span class="dur">דקה</span></div>
+      <div class="seg seg-2"><span class="dur">חמש דקות</span></div>
+      <div class="seg seg-3"><span class="dur">ומשם, עבודה</span></div>
+    </div>
+    <div class="clauses" data-rise>
+      <p>קודם, פותחים את הקובץ וגוררים את AgentHub לתיקיית Applications.</p>
+      <p>אחר כך, מתקינים את Claude Code או Codex ומתחברים, אם עוד לא.</p>
+      <p>ומשם, בוחרים תיקיית פרויקט וכותבים. עדכונים מגיעים לבד.</p>
+    </div>
+    <div class="stages-foot">
+      <div class="update-ui" data-ui data-rise aria-label="כך נראה עדכון באפליקציה">
+        <span>גרסה 0.2.0 של AgentHub מוכנה</span><span class="u-btn">הפעל מחדש ועדכן</span><span class="u-later">אחר כך</span>
+      </div>
+      <figure data-rise><img src="assets/invite-photo.jpg" width="1440" height="820" loading="lazy" alt="תמונת חתן וכלה בין עצי זית שקלוד יצר בהייגספילד, בכותרת רוחב מלא של ההזמנה"></figure>
+    </div>
+  </section>
+
+  <section id="faq" aria-labelledby="faq-title">
+    <div class="faq">
+      <h2 class="faq-title" id="faq-title" data-rise>שאלות</h2>
+      <div class="qa" data-rise><h3>הקוד שלי עולה לאנשהו?</h3><p>לא דרכנו. AgentHub רץ על המחשב שלך ומפעיל את הכלים שכבר מותקנים אצלך. הסוכנים מדברים עם Anthropic ו-OpenAI בדיוק כמו בלי AgentHub.</p></div>
+      <div class="qa" data-rise><h3>מה צריך כדי להתחיל?</h3><p>מק עם שבב Apple (M1 ומעלה), ולפחות אחד מהשניים: Claude Code או Codex, מותקן ומחובר עם החשבון שלך.</p></div>
+      <div class="qa" data-rise><h3>כמה זה עולה?</h3><p>AgentHub חינם בתקופת הבטא. על הסוכנים עצמם משלמים כמו היום, דרך המנוי או החשבון שלך אצל Anthropic או OpenAI.</p></div>
+      <div class="qa" data-rise><h3>ומה עם הייגספילד?</h3><p>עובד, וגם כל מחבר אחר. כל מחבר שחיברת ל-Claude זמין בצ'אט. כשמבקשים אותו במפורש הוא עובד בלי לשאול, ואחרת מופיע כרטיס אישור.</p></div>
+      <div class="qa" data-rise><h3>איך מתעדכנים?</h3><p>לבד. גרסה חדשה יורדת ברקע, ומופיע פס עם "הפעל מחדש ועדכן". אם לא לוחצים, היא מותקנת בסגירה הבאה.</p></div>
+      <div class="qa" data-rise><h3>ווינדוס ומק עם אינטל?</h3><p>בדרך. בינתיים יש גרסה למק עם שבב Apple בלבד.</p></div>
+    </div>
+  </section>
+
+  <section class="closing" aria-labelledby="closing-title">
+    <h2 class="visually-hidden" id="closing-title" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)">הורדה</h2>
+    <div class="closing-text">
+      <p class="statement" data-rise>הצוות שלך מוכן.<br>נשאר רק <a class="button" href="https://github.com/drorfallach4-glitch/agenthub-releases/releases/latest/download/AgentHub-mac-arm64.dmg">להוריד</a></p>
+      <p class="after" data-rise>למק עם שבב Apple. האפליקציה חתומה ומאושרת על ידי אפל.</p>
+    </div>
+    <figure data-rise><img src="assets/invite-rsvp.jpg" width="1440" height="1100" loading="lazy" alt="טופס אישור הגעה בהזמנה, לצד תמונת ידיים משולבות עם טבעת"></figure>
+  </section>
+</main>
+
+<footer>
+  <div class="foot-name" aria-hidden="true">AgentHub</div>
+  <div class="foot-row">
+    <ul class="foot-places">
+      <li><a href="https://github.com/drorfallach4-glitch/agenthub-releases/releases/latest/download/AgentHub-mac-arm64.dmg">הורדה למק</a></li>
+      <li><a href="https://github.com/drorfallach4-glitch/agenthub-releases/releases">כל הגרסאות</a></li>
+    </ul>
+    <ul class="foot-links">
+      <li><a href="#how">איך זה עובד</a><a href="#faq">שאלות</a></li>
+      <li><a href="https://code.claude.com/docs/en/setup">התקנת Claude Code</a><a href="https://developers.openai.com/codex">התקנת Codex</a></li>
+    </ul>
+  </div>
+  <div class="foot-legal"><span>© 2026 AgentHub</span><a href="#top">חזרה למעלה</a></div>
+</footer>
+
+<script>
+(() => {
+  const samples = [
+    {
+      text: 'קודקס תכתוב תוכנית לגלריה, וקלוד יבנה לפיה באופוס. אחר כך תבדקו אחד את השני.',
+      parts: [['קודקס', 'לכתוב תוכנית לגלריה', 'ביקורת: קלוד'], ['קלוד', 'לבנות את הגלריה לפי התוכנית', 'Opus · מחכה לקודקס · ביקורת: קודקס']],
+    },
+    {
+      text: 'תייצר בהייגספילד תמונה של חתן וכלה בין עצי זית.',
+      parts: [['קודקס', 'לייצר תמונה של חתן וכלה', 'קלוד מתאים יותר: יש לו הייגספילד · שלח לקלוד']],
+    },
+    { text: 'תודה רבה!', parts: [] },
+  ]
+  const textEl = document.getElementById('sample-text')
+  const resultEl = document.getElementById('sample-result')
+  const buttons = [...document.querySelectorAll('[data-sample]')]
+  const render = (index) => {
+    const sample = samples[index]
+    textEl.textContent = sample.text
+    resultEl.replaceChildren()
+    if (sample.parts.length === 0) {
+      const none = document.createElement('div')
+      none.className = 'status'
+      none.textContent = 'אף סוכן לא מתחיל לעבוד. ההודעה נשמרת בשיחה.'
+      resultEl.append(none)
+    }
+    for (const [name, part, tags] of sample.parts) {
+      const row = document.createElement('div')
+      row.className = 'part'
+      for (const [cls, value] of [['name', name], ['', part], ['tags', tags]]) {
+        const span = document.createElement('span')
+        if (cls) span.className = cls
+        span.textContent = value
+        row.append(span)
+      }
+      resultEl.append(row)
+    }
+    for (const button of buttons) button.setAttribute('aria-pressed', String(button.dataset.sample === String(index)))
+  }
+  for (const button of buttons) button.addEventListener('click', () => render(Number(button.dataset.sample)))
+
+  const rising = document.querySelectorAll('[data-rise]')
+  if (!('IntersectionObserver' in window)) { rising.forEach((el) => el.classList.add('in')); return }
+  const seen = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return
+      const el = entry.target
+      const siblings = [...el.parentElement.querySelectorAll(':scope > [data-rise]')]
+      el.style.transitionDelay = `${Math.max(0, siblings.indexOf(el)) * 75}ms`
+      el.classList.add('in')
+      seen.unobserve(el)
+    })
+  }, { threshold: 0.12 })
+  rising.forEach((el) => seen.observe(el))
+})()
+</script>
+</body>
+</html>
